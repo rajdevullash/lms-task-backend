@@ -1,14 +1,19 @@
-/* eslint-disable no-undef */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-undef */
 import { v2 as cloudinary } from 'cloudinary';
+import config from '../config';
+import { CloudinaryUploadFile } from '../interfaces/cloudinaryUpload';
 
 import { Request } from 'express';
 import multer from 'multer';
 import { z } from 'zod';
-import config from '../config';
-import { CloudinaryUploadFile } from '../interfaces/cloudinaryUpload';
-
+// Configure Cloudinary with your credentials
+cloudinary.config({
+  cloud_name: config.cloudinary_cloud_name,
+  api_key: config.cloudinary_api_key,
+  api_secret: config.cloudinary_api_secret,
+});
 type MulterRequest = Request & { files: Express.Multer.File[] };
 
 export const storage = multer.memoryStorage();
@@ -34,13 +39,6 @@ export const fileFilter = (
   }
 };
 
-// Configure Cloudinary with your credentials
-cloudinary.config({
-  cloud_name: config.cloudinary_cloud_name,
-  api_key: config.cloudinary_api_key,
-  api_secret: config.cloudinary_api_secret,
-});
-
 export const cloudinaryUploadFileSchema = z.object({
   fieldname: z.string(),
   originalname: z.string(),
@@ -62,7 +60,6 @@ export const validateCloudinaryUploadFile = (
     throw new Error(`Invalid file type. Only JPG, PNG, and WEBP are allowed.`);
   }
 };
-
 export const uploadToCloudinary = async (
   files: CloudinaryUploadFile[],
 ): Promise<{ public_id: string; secure_url: string }[]> => {
@@ -73,7 +70,7 @@ export const uploadToCloudinary = async (
     return new Promise<{ public_id: string; secure_url: string }>(
       (resolve, reject) => {
         const upload_stream = cloudinary.uploader.upload_stream(
-          { folder: 'product-images' },
+          { folder: 'main-images' },
           (error, result: any) => {
             if (error) {
               reject(error);
@@ -113,7 +110,8 @@ export const deleteCloudinaryFiles = async (
     }
 
     return new Promise<void>((resolve, reject) => {
-      const publicId: string | undefined = file.public_id;
+      // Use the Cloudinary API to delete the file by its public ID
+      const publicId: string | undefined = file.public_id; // Allow undefined
       if (publicId === undefined) {
         // Skip files with undefined public_id
         return resolve();

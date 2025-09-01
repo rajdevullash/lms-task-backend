@@ -1,12 +1,12 @@
 import mongoose, { Model } from 'mongoose';
-import { CloudinaryUploadFile } from '../../../interfaces/cloudinaryUpload';
 export type ICourse = {
   title: string;
   slug?: string;
   description: string;
-  price: number;
+  price: string;
 
-  thumbnail: CloudinaryUploadFile[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  thumbnail: Record<string, any>[] | null;
   createdBy: mongoose.Types.ObjectId;
 };
 export type CourseModel = Model<ICourse, Record<string, unknown>>;

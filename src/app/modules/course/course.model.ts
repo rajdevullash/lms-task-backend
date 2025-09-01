@@ -15,10 +15,10 @@ const CourseSchema = new Schema<ICourse, CourseModel>(
       type: String,
     },
     price: {
-      type: Number,
+      type: String,
     },
     thumbnail: {
-      type: [Object],
+      type: [Schema.Types.Mixed],
       required: true,
     },
     createdBy: {

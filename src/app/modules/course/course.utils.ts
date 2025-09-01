@@ -9,4 +9,4 @@ export const configureImagesUpload = () =>
       fileSize: 1024 * 1024 * 10,
       files: 1, // Adjust the limit for the number of files to 2
     },
-  }).fields([{ name: 'image', maxCount: 1 }]);
+  }).fields([{ name: 'thumbnail', maxCount: 1 }]);

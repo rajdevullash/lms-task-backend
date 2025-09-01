@@ -16,6 +16,7 @@ const auth =
     try {
       //get authorization token
       const token = req.headers.authorization;
+      console.log('middleware token', token);
       if (!token) {
         throw new ApiError(httpStatus.UNAUTHORIZED, 'You are not authorized');
       }

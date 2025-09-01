@@ -30,7 +30,6 @@ const createUser = async (user: IUser): Promise<Omit<IUser, 'password'>> => {
   const createdUser = await User.create({
     ...user,
     password: hashedPassword,
-    role: ENUM_USER_ROLE.USER, // Force this value
   });
 
   // Fetch the user again without the password field
@@ -52,6 +51,7 @@ const createUser = async (user: IUser): Promise<Omit<IUser, 'password'>> => {
 
 const loginUser = async (payload: IUserLogin): Promise<IUserLoginResponse> => {
   const { email, password } = payload;
+  console.log('service data', payload);
 
   const user = await User.findOne({ email }).select('+password');
   if (!user) {
