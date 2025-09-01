@@ -13,6 +13,8 @@ export default {
     refresh_secret: process.env.JWT_REFRESH_SECRET,
     expires_in: process.env.JWT_EXPIRES_IN,
     refresh_expires_in: process.env.JWT_REFRESH_EXPIRES_IN,
+    cookie_expires_in: process.env.JWT_COOKIE_EXPIRES_IN,
+    refresh_cookie_expires_in: process.env.JWT_REFRESH_COOKIE_EXPIRES_IN,
   },
   cloudinary_cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   cloudinary_api_key: process.env.CLOUDINARY_API_KEY,
