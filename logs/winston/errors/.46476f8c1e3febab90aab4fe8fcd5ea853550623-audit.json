@@ -1,0 +1,15 @@
+{
+  "keep": {
+    "days": true,
+    "amount": 14
+  },
+  "auditLog": "D:\\ICrew\\boilerplate-testing\\logs\\winston\\errors\\.46476f8c1e3febab90aab4fe8fcd5ea853550623-audit.json",
+  "files": [
+    {
+      "date": 1725873764052,
+      "name": "D:\\ICrew\\boilerplate-testing\\logs\\winston\\errors\\btu-2024-09-09-15-error.log",
+      "hash": "7dcb4c1bba7204258f9a2c5a6282274c0b62cfcb436ae60854b6742c871d8501"
+    }
+  ],
+  "hashType": "sha256"
+}
