@@ -113,10 +113,27 @@ const deleteCourse = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getCourseWithProgress = catchAsync(
+  async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const userId = req.user?.id as string | undefined;
+
+    const result = await CourseService.getCourseWithProgress(id, userId);
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'Course with progress fetched successfully',
+      data: result,
+    });
+  },
+);
+
 export const CourseController = {
   createCourse,
   getAllCourses,
   getSingleCourse,
+  getCourseWithProgress,
   updateCourse,
   deleteCourse,
 };

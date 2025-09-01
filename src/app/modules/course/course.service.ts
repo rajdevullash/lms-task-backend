@@ -1,16 +1,21 @@
 import httpStatus from 'http-status';
-import { SortOrder } from 'mongoose';
+import { Document, SortOrder, Types } from 'mongoose';
 import slugify from 'slugify';
 import ApiError from '../../../errors/ApiError';
 import { paginationHelpers } from '../../../helpers/paginationHelper';
 import { CloudinaryUploadFile } from '../../../interfaces/cloudinaryUpload';
 import { IGenericResponse } from '../../../interfaces/common';
 import { IPaginationOptions } from '../../../interfaces/pagination';
+import { checkLectureAccessHelper } from '../../../shared/checkLectureAccessHelper ';
 import {
   deleteCloudinaryFiles,
   uploadToCloudinary,
 } from '../../../shared/cloudinary';
 import { User } from '../auth/auth.model';
+import { Lecture } from '../lecture/lecture.model';
+import { Module } from '../module/module.model';
+import { IProgress } from '../progress/progress.interface';
+import { Progress } from '../progress/progress.model';
 import { courseFilterableFields } from './course.constant';
 import { ICourse, ICourseFilters } from './course.interface';
 import { Course } from './course.model';
@@ -212,10 +217,83 @@ const deleteCourse = async (
   return null;
 };
 
+const getCourseWithProgress = async (courseId: string, userId?: string) => {
+  const course = await Course.findById(courseId);
+  if (!course) {
+    throw new Error('Course not found');
+  }
+
+  const modules = await Module.find({ courseId: course._id }).sort({
+    moduleNumber: 1,
+  });
+
+  const lectures = await Lecture.find({ courseId: course._id })
+    .populate('moduleId')
+    .sort({ order: 1 });
+
+  let progress:
+    | (Document<unknown, Record<string, unknown>, IProgress> &
+        IProgress & { _id: Types.ObjectId })
+    | null = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let lecturesWithAccess: any[] = lectures;
+
+  if (userId) {
+    progress = await Progress.findOne({ userId, courseId: course._id });
+
+    lecturesWithAccess = await Promise.all(
+      lectures.map(async lecture => {
+        const accessInfo = await checkLectureAccessHelper(
+          course._id,
+          userId,
+          lecture._id,
+          lectures,
+        );
+
+        return {
+          ...lecture.toObject(),
+          isLocked: !accessInfo.canAccess,
+          isCompleted:
+            progress?.completedLectures.includes(lecture._id) || false,
+          isCurrent:
+            progress?.currentLecture?.toString() === lecture._id.toString(),
+          lockReason: accessInfo.reason,
+        };
+      }),
+    );
+  } else {
+    // Guest users
+    lecturesWithAccess = lectures.map(lecture => ({
+      ...lecture.toObject(),
+      isLocked: true,
+      isCompleted: false,
+      isCurrent: false,
+      videoUrl: null,
+      pdfNotes: [],
+    }));
+  }
+
+  return {
+    course,
+    modules,
+    lectures: lecturesWithAccess,
+    progress: progress
+      ? {
+          totalLectures: lectures.length,
+          completedLectures: progress.completedLectures.length,
+          progressPercentage: progress.progressPercentage,
+          currentLecture: progress.currentLecture,
+          lastAccessed: progress.lastAccessed,
+        }
+      : null,
+  };
+};
+
 export const CourseService = {
   createCourse,
   getAllCourses,
   getSingleCourse,
+  getCourseWithProgress,
   updateCourse,
   deleteCourse,
 };

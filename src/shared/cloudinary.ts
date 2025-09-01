@@ -134,3 +134,117 @@ export const deleteCloudinaryFiles = async (
     throw new Error(`Error deleting Cloudinary files ${error}`);
   }
 };
+
+// ✅ File filter for PDFs
+export const pdfFileFilter = (
+  req: MulterRequest,
+  file: Express.Multer.File,
+  callback: multer.FileFilterCallback,
+) => {
+  const maxFiles = 5; // e.g., allow up to 5 PDFs
+  if (req.files.length > maxFiles) {
+    return callback(
+      new Error(`Number of files exceeds the limit of ${maxFiles}`) as any,
+      false,
+    );
+  }
+
+  if (file.mimetype !== 'application/pdf') {
+    return callback(new Error('Only PDF files are allowed') as any, false);
+  }
+
+  callback(null, true);
+};
+
+// ✅ Validation schema for PDF uploads
+export const cloudinaryUploadPdfSchema = z.object({
+  fieldname: z.string(),
+  originalname: z.string(),
+  encoding: z.string(),
+  mimetype: z.literal('application/pdf'),
+  buffer: z.instanceof(Buffer),
+  size: z.number(),
+});
+
+export const validateCloudinaryUploadPdf = (
+  file: CloudinaryUploadFile,
+): void => {
+  cloudinaryUploadPdfSchema.parse(file);
+
+  if (file.mimetype !== 'application/pdf') {
+    throw new Error('Invalid file type. Only PDF is allowed.');
+  }
+};
+
+// ✅ Upload multiple PDFs to Cloudinary
+export const uploadPdfsToCloudinary = async (
+  files: CloudinaryUploadFile[],
+): Promise<{ public_id: string; secure_url: string }[]> => {
+  files.forEach(validateCloudinaryUploadPdf);
+
+  const uploadPromises = files.map(file => {
+    return new Promise<{ public_id: string; secure_url: string }>(
+      (resolve, reject) => {
+        const upload_stream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'pdf-files',
+            resource_type: 'raw',
+          },
+          (error, result: any) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve({
+                public_id: result.public_id,
+                secure_url: result.secure_url,
+              });
+            }
+          },
+        );
+
+        upload_stream.end(file.buffer);
+      },
+    );
+  });
+
+  try {
+    return await Promise.all(uploadPromises);
+  } catch (error) {
+    throw new Error(
+      `Failed to upload PDFs to Cloudinary: ${
+        error instanceof Error ? error.message : 'Unknown error'
+      }`,
+    );
+  }
+};
+
+// ✅ Delete PDFs from Cloudinary
+export const deleteCloudinaryPdfs = async (
+  files: CloudinaryUploadFile[],
+): Promise<void> => {
+  const deletePromises = files.map(file => {
+    if (!file.public_id) return Promise.resolve();
+
+    return new Promise<void>((resolve, reject) => {
+      const publicId: string | undefined = file.public_id; // Allow undefined
+      if (publicId === undefined) {
+        // Skip files with undefined public_id
+        return resolve();
+      }
+      cloudinary.uploader.destroy(
+        publicId,
+        { resource_type: 'raw' },
+        (error: any) => {
+          if (error) reject(error);
+          else resolve();
+        },
+      );
+    });
+  });
+
+  try {
+    await Promise.all(deletePromises);
+  } catch (error: any) {
+    throw new Error(`Error deleting Cloudinary PDFs: ${error.message}`);
+  }
+};
