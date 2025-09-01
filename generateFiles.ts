@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+const fs = require('fs');
+const path = require('path');
 if (process.argv.length < 3) {
   console.error(
     'Usage: node generate-folder-structure.js <FolderName> <FileName>',
