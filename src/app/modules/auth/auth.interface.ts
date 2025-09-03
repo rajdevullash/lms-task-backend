@@ -28,5 +28,7 @@ export type IRefreshTokenResponse = {
 
 export type ITokenPayload = {
   userId: string;
+  name: string;
+  email: string;
   role: ENUM_USER_ROLE;
 };

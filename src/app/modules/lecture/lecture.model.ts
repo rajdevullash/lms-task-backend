@@ -31,8 +31,8 @@ const LectureSchema = new Schema<ILecture, LectureModel>(
     },
     order: {
       type: Number,
-      required: true,
     },
+    isLocked: { type: Boolean, default: true },
   },
   {
     timestamps: true,

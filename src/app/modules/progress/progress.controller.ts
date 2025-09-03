@@ -33,6 +33,8 @@ const getUserProgress = catchAsync(async (req: Request, res: Response) => {
 
 const markLectureComplete = catchAsync(async (req: Request, res: Response) => {
   const { courseId, lectureId } = req.body;
+
+  console.log(courseId, lectureId);
   const userId = req.user?.userId as string;
 
   const result = await ProgressService.markLectureComplete(

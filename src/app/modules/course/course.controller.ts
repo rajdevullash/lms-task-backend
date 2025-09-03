@@ -57,6 +57,24 @@ const getAllCourses = catchAsync(async (req: Request, res: Response) => {
     data: result.data,
   });
 });
+const getAllCoursesUser = catchAsync(async (req: Request, res: Response) => {
+  const filters = pick(req.query, courseFilterableFields);
+  const paginationOptions = pick(req.query, paginationFields);
+  const userId = req.user?.userId;
+  const result = await CourseService.getAllCoursesUser(
+    userId,
+    filters,
+    paginationOptions,
+  );
+
+  sendResponse<ICourse[]>(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Courses fetched successfully',
+    meta: result.meta,
+    data: result.data,
+  });
+});
 
 //get course by id
 
@@ -64,6 +82,19 @@ const getSingleCourse = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const userId = req.user?.userId;
   const result = await CourseService.getSingleCourse(userId, id);
+  sendResponse<ICourse>(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Single Course fetched successfully',
+    data: result,
+  });
+});
+//get course by id user
+
+const getSingleCourseUser = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const userId = req.user?.userId;
+  const result = await CourseService.getSingleCourseUser(userId, id);
   sendResponse<ICourse>(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -132,7 +163,9 @@ const getCourseWithProgress = catchAsync(
 export const CourseController = {
   createCourse,
   getAllCourses,
+  getAllCoursesUser,
   getSingleCourse,
+  getSingleCourseUser,
   getCourseWithProgress,
   updateCourse,
   deleteCourse,

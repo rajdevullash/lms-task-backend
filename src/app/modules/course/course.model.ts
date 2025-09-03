@@ -15,7 +15,7 @@ const CourseSchema = new Schema<ICourse, CourseModel>(
       type: String,
     },
     price: {
-      type: String,
+      type: Number,
     },
     thumbnail: {
       type: [Schema.Types.Mixed],

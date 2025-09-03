@@ -1,11 +1,12 @@
 // Your service code here
 import httpStatus from 'http-status';
-import { SortOrder } from 'mongoose';
+import mongoose, { SortOrder } from 'mongoose';
 import slugify from 'slugify';
 import ApiError from '../../../errors/ApiError';
 import { paginationHelpers } from '../../../helpers/paginationHelper';
 import { IGenericResponse } from '../../../interfaces/common';
 import { IPaginationOptions } from '../../../interfaces/pagination';
+import { Course } from '../course/course.model';
 import { moduleFilterableFields } from './module.constant';
 import { IModule, IModuleFilters } from './module.interface';
 import { Module } from './module.model';
@@ -38,6 +39,10 @@ const getAllModules = async (
   // Extract searchTerm to implement search query
   const { searchTerm, ...filtersData } = filters;
 
+  console.log(typeof courseId);
+
+  let updateCourseId = courseId;
+
   const { page, limit, skip, sortBy, sortOrder } =
     paginationHelpers.calculatePagination(paginationOptions);
 
@@ -69,11 +74,28 @@ const getAllModules = async (
   }
   const whereConditions =
     andConditions.length > 0 ? { $and: andConditions } : {};
+
+  if (
+    courseId === String(courseId) &&
+    mongoose.isValidObjectId(courseId) == false
+  ) {
+    const course = await Course.findOne({ slug: courseId });
+    if (!course) {
+      throw new Error('Course not found');
+    }
+
+    updateCourseId = course?._id.toString();
+  }
+
+  console.log(updateCourseId);
+
   const result = await Module.find(whereConditions)
-    .where({ courseId: courseId })
+    .where({ courseId: updateCourseId })
     .sort(sortConditions)
     .skip(skip)
     .limit(limit);
+
+  console.log(result);
 
   const total = await Module.countDocuments(whereConditions);
 

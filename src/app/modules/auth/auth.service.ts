@@ -72,6 +72,8 @@ const loginUser = async (payload: IUserLogin): Promise<IUserLoginResponse> => {
   // );
   const tokenPayload: ITokenPayload = {
     userId: user._id.toString(),
+    name: user.name,
+    email: user.email,
     role: user.role as ENUM_USER_ROLE,
   };
 
@@ -113,6 +115,8 @@ const refreshAccessToken = async (refreshToken: string): Promise<string> => {
 
   const tokenPayload: ITokenPayload = {
     userId: user._id.toString(),
+    name: user.name,
+    email: user.email,
     role: user.role as ENUM_USER_ROLE,
   };
 

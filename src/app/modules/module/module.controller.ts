@@ -10,6 +10,7 @@ import { IModule } from './module.interface';
 import { ModuleService } from './module.service';
 
 const createModule = catchAsync(async (req: Request, res: Response) => {
+  console.log(req.body);
   const result = await ModuleService.createModule(req.body);
 
   sendResponse<IModule>(res, {
@@ -23,13 +24,13 @@ const createModule = catchAsync(async (req: Request, res: Response) => {
 //get all module
 
 const getAllModules = catchAsync(async (req: Request, res: Response) => {
-  const { courseId } = req.params;
+  const { id } = req.params;
   const filters = pick(req.query, moduleFilterableFields);
   const paginationOptions = pick(req.query, paginationFields);
   const result = await ModuleService.getAllModules(
     filters,
     paginationOptions,
-    courseId,
+    id,
   );
 
   sendResponse<IModule[]>(res, {

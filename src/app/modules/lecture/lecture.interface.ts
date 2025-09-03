@@ -10,6 +10,7 @@ export type ILecture = {
   moduleId: mongoose.Types.ObjectId;
   courseId: mongoose.Types.ObjectId;
   order: number;
+  isLocked: boolean;
   createdAt?: Date;
 };
 export type LectureModel = Model<ILecture, Record<string, unknown>>;

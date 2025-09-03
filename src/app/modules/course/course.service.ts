@@ -6,6 +6,7 @@ import { paginationHelpers } from '../../../helpers/paginationHelper';
 import { CloudinaryUploadFile } from '../../../interfaces/cloudinaryUpload';
 import { IGenericResponse } from '../../../interfaces/common';
 import { IPaginationOptions } from '../../../interfaces/pagination';
+// import { checkLectureAccessHelper } from '../../../shared/checkLectureAccessHelper ';
 import { checkLectureAccessHelper } from '../../../shared/checkLectureAccessHelper ';
 import {
   deleteCloudinaryFiles,
@@ -125,6 +126,62 @@ const getAllCourses = async (
     data: result,
   };
 };
+//get all courses user
+const getAllCoursesUser = async (
+  userId: string,
+  filters: ICourseFilters,
+  paginationOptions: IPaginationOptions,
+): Promise<IGenericResponse<ICourse[]>> => {
+  // Extract searchTerm to implement search query
+  const { searchTerm, ...filtersData } = filters;
+
+  const { page, limit, skip, sortBy, sortOrder } =
+    paginationHelpers.calculatePagination(paginationOptions);
+
+  const andConditions = [];
+  // Search needs $or for searching in specified fields
+  if (searchTerm) {
+    andConditions.push({
+      $or: courseFilterableFields.map(field => ({
+        [field]: {
+          $regex: searchTerm,
+          $options: 'i',
+        },
+      })),
+    });
+  }
+  // Filters needs $and to fullfill all the conditions
+  if (Object.keys(filtersData).length) {
+    andConditions.push({
+      $and: Object.entries(filtersData).map(([field, value]) => ({
+        [field]: value,
+      })),
+    });
+  }
+
+  // Dynamic  Sort needs  field to  do sorting
+  const sortConditions: { [key: string]: SortOrder } = {};
+  if (sortBy && sortOrder) {
+    sortConditions[sortBy] = sortOrder;
+  }
+  const whereConditions =
+    andConditions.length > 0 ? { $and: andConditions } : {};
+  const result = await Course.find(whereConditions)
+    .sort(sortConditions)
+    .skip(skip)
+    .limit(limit);
+
+  const total = await Course.countDocuments(whereConditions);
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
+};
 
 //get single course
 const getSingleCourse = async (
@@ -134,6 +191,19 @@ const getSingleCourse = async (
   const result = await Course.findOne({
     slug: courseId,
     createdBy: userId,
+  });
+  if (!result) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Course not found');
+  }
+  return result;
+};
+//get single course user
+const getSingleCourseUser = async (
+  userId: string,
+  courseId: string,
+): Promise<ICourse | null> => {
+  const result = await Course.findOne({
+    slug: courseId,
   });
   if (!result) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Course not found');
@@ -218,7 +288,7 @@ const deleteCourse = async (
 };
 
 const getCourseWithProgress = async (courseId: string, userId?: string) => {
-  const course = await Course.findById(courseId);
+  const course = await Course.findOne({ slug: courseId });
   if (!course) {
     throw new Error('Course not found');
   }
@@ -230,6 +300,8 @@ const getCourseWithProgress = async (courseId: string, userId?: string) => {
   const lectures = await Lecture.find({ courseId: course._id })
     .populate('moduleId')
     .sort({ order: 1 });
+
+  console.log(lectures);
 
   let progress:
     | (Document<unknown, Record<string, unknown>, IProgress> &
@@ -252,7 +324,7 @@ const getCourseWithProgress = async (courseId: string, userId?: string) => {
 
         return {
           ...lecture.toObject(),
-          isLocked: !accessInfo.canAccess,
+          isLocked: lecture.isLocked,
           isCompleted:
             progress?.completedLectures.includes(lecture._id) || false,
           isCurrent:
@@ -265,11 +337,8 @@ const getCourseWithProgress = async (courseId: string, userId?: string) => {
     // Guest users
     lecturesWithAccess = lectures.map(lecture => ({
       ...lecture.toObject(),
-      isLocked: true,
       isCompleted: false,
       isCurrent: false,
-      videoUrl: null,
-      pdfNotes: [],
     }));
   }
 
@@ -292,7 +361,9 @@ const getCourseWithProgress = async (courseId: string, userId?: string) => {
 export const CourseService = {
   createCourse,
   getAllCourses,
+  getAllCoursesUser,
   getSingleCourse,
+  getSingleCourseUser,
   getCourseWithProgress,
   updateCourse,
   deleteCourse,

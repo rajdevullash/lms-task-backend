@@ -1,11 +1,9 @@
 // Define your routes here
-// Define your routes here
-// // Define your routes here
 
 import express from 'express';
-// import multer from 'multer';
+
 import { ENUM_USER_ROLE } from '../../../enums/user';
-// import { fileFilter, storage } from '../../../shared/cloudinary';
+
 import auth from '../../middlewares/auth';
 import { ProgressController } from './progress.controller';
 
@@ -39,4 +37,4 @@ router.patch(
   ProgressController.updateCurrentLecture,
 );
 
-export const ModuleRoutes = router;
+export const ProgressRoutes = router;

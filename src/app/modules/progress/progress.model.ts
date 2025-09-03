@@ -20,22 +20,9 @@ const ProgressSchema = new Schema<IProgress, ProgressModel>(
         ref: 'Lecture',
       },
     ],
-    currentLecture: {
-      type: Schema.Types.ObjectId,
-      ref: 'Lecture',
-      required: true,
-    },
-    progressPercentage: {
-      type: Number,
-      required: true,
-      min: 0,
-      max: 100,
-      default: 0,
-    },
-    lastAccessed: {
-      type: Date,
-      default: Date.now,
-    },
+    currentLecture: { type: Schema.Types.ObjectId, ref: 'Lecture' },
+    progressPercentage: { type: Number, default: 0 },
+    lastAccessed: { type: Date, default: Date.now },
   },
   {
     timestamps: true,

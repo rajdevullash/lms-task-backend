@@ -24,7 +24,7 @@ export const updateCourseZodSchema = z.object({
   body: z.object({
     title: z.string().min(3).optional(),
     description: z.string().min(10).optional(),
-    price: z.number().nonnegative().optional(),
+    price: z.string().optional(),
   }),
 });
 

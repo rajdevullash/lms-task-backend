@@ -17,11 +17,26 @@ router.get(
   auth(ENUM_USER_ROLE.ADMIN),
   CourseController.getAllCourses,
 );
+router.get(
+  '/get-all-course-user',
+  auth(ENUM_USER_ROLE.USER),
+  CourseController.getAllCoursesUser,
+);
 
 router.get(
   '/:id',
   auth(ENUM_USER_ROLE.ADMIN),
   CourseController.getSingleCourse,
+);
+router.get(
+  '/user-single-course/:id',
+  auth(ENUM_USER_ROLE.USER),
+  CourseController.getSingleCourseUser,
+);
+router.get(
+  '/with-progress/:id',
+  auth(ENUM_USER_ROLE.USER),
+  CourseController.getCourseWithProgress,
 );
 
 router.post(

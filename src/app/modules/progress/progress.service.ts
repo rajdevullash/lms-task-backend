@@ -31,7 +31,7 @@ const getCourseProgress = async (courseId: string, userId: string) => {
 
 const getUserProgress = async (userId: string) => {
   const progressList = await Progress.find({ userId })
-    .populate('courseId', 'title thumbnail')
+    .populate('courseId', 'title thumbnail slug')
     .populate('currentLecture', 'title')
     .sort({ lastAccessed: -1 });
 
@@ -70,14 +70,19 @@ const markLectureComplete = async (
   progress.progressPercentage =
     (progress.completedLectures.length / totalLectures) * 100;
 
-  // Find next unlocked lecture to set as current
+  // Get all lectures sorted by order
   const allLectures = await Lecture.find({ courseId }).sort({ order: 1 });
   const currentLectureIndex = allLectures.findIndex(
     l => l._id.toString() === lectureId.toString(),
   );
 
+  //update the current lecture
+  await Lecture.findByIdAndUpdate(lectureId, { isLocked: false });
+
+  // Unlock the next lecture
   if (currentLectureIndex < allLectures.length - 1) {
     const nextLecture = allLectures[currentLectureIndex + 1];
+    await Lecture.findByIdAndUpdate(nextLecture._id, { isLocked: false });
     progress.currentLecture = nextLecture._id;
   } else {
     progress.currentLecture = new Types.ObjectId(lectureId);

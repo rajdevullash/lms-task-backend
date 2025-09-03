@@ -6,15 +6,12 @@ const ModuleSchema = new Schema<IModule, ModuleModel>(
   {
     title: {
       type: String,
-      unique: true,
     },
     slug: {
       type: String,
-      unique: true,
     },
     moduleNumber: {
       type: Number,
-      unique: true,
     },
     courseId: {
       type: Schema.Types.ObjectId,

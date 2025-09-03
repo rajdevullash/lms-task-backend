@@ -3,7 +3,7 @@ export type ICourse = {
   title: string;
   slug?: string;
   description: string;
-  price: string;
+  price: number;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   thumbnail: Record<string, any>[] | null;
