@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import nodemailer from 'nodemailer';
 
 export async function sendEmail(to: string, html: string) {

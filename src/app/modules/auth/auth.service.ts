@@ -53,7 +53,7 @@ const loginUser = async (payload: IUserLogin): Promise<IUserLoginResponse> => {
   const { email, password } = payload;
   console.log('service data', payload);
 
-  const user = await User.findOne({ email }).select('+password');
+  const user = await User.findOne({ email: email }).select('+password');
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User does not exist');
   }

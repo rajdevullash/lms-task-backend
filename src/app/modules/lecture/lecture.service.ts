@@ -171,6 +171,8 @@ const getSingleLecture = async (
       lecture: {
         _id: lecture._id,
         title: lecture.title,
+        videoUrl: lecture.videoUrl,
+        pdfNotes: lecture.pdfNotes,
         moduleId: lecture.moduleId,
         courseId: lecture.courseId,
         order: lecture.order,

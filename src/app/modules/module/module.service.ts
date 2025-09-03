@@ -16,6 +16,7 @@ const createModule = async (payload: IModule): Promise<IModule | null> => {
 
   // Get the next module number
   const moduleCount = await Module.countDocuments({ courseId });
+  console.log(moduleCount);
   const moduleNumber = moduleCount + 1;
 
   const baseSlug = slugify(title, { lower: true });
@@ -113,6 +114,7 @@ const updateModule = async (
   id: string,
   payload: Partial<IModule>,
 ): Promise<IModule | null> => {
+  console.log('id', id);
   const existingModule = await Module.findOne({ slug: id });
   if (!existingModule) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Module not found');
