@@ -280,6 +280,12 @@ const deleteCourse = async (
   if (!existingCourse) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Course not found');
   }
+
+  //delete all module lecture progress connected to the course
+  await Module.deleteMany({ courseId: existingCourse._id });
+  await Lecture.deleteMany({ courseId: existingCourse._id });
+  await Progress.deleteMany({ courseId: existingCourse._id });
+
   await Course.findOneAndDelete({
     slug: courseId,
     createdBy: userId,
